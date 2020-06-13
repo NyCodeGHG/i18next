@@ -150,7 +150,7 @@ public interface Operation {
     @Override
     public boolean equals(Object o) {
       if (o instanceof Plural) {
-        var oPlural = (Plural) o;
+        Plural oPlural = (Plural) o;
         return oPlural.mCount == mCount && mInterpolation.equals(oPlural.mInterpolation);
       }
       return false;
