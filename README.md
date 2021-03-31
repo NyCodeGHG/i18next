@@ -21,6 +21,6 @@ dependencies {
 <dependency>
     <groupId>de.nycode</groupId>
     <artifactId>i18next</artifactId>
-    <version>1.0.0-20210331.212356-1</version>
+    <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
