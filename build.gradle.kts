@@ -1,16 +1,14 @@
 plugins {
     `java-library`
-     maven
     `maven-publish`
-    id("com.jfrog.bintray") version "1.8.5"
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
-group = "com.i18next"
-version = "1.0"
+group = "de.nycode"
+version = "1.0.0-SNAPSHOT"
 
 dependencies {
     implementation("org.json:json:20200518")
@@ -19,51 +17,33 @@ dependencies {
     testImplementation("junit:junit:4.13")
 }
 
-configure<JavaPluginConvention> {
+java {
     sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+    withJavadocJar()
+    withSourcesJar()
 }
-val javaComponent = components["java"]
 
-tasks {
-    val sourcesJar = task<Jar>("sourcesJar") {
-        dependsOn(classes)
-        archiveClassifier.set("sources")
-        from(sourceSets["main"].allSource)
+publishing {
+    val artifactoryUsername = System.getenv("ARTIFACTORY_USERNAME") ?: return@publishing
+    val artifactoryPassword = System.getenv("ARTIFACTORY_PASSWORD") ?: return@publishing
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "de.nycode"
+            artifactId = "i18next"
+            version = "1.0.0-SNAPSHOT"
+            from(components["java"])
+        }
     }
-
-    val javadocJar = task<Jar>("javadocJar") {
-        from(javadoc)
-        archiveClassifier.set("javadoc")
-    }
-
-    publishing {
-        publications {
-            create<MavenPublication>("mavenJava") {
-                from(javaComponent)
-                artifact(sourcesJar)
-                artifact(javadocJar)
+    repositories {
+        maven {
+            val releasesRepoUrl = "https://nycode.jfrog.io/artifactory/nycode-releases/"
+            val snapshotsRepoUrl = "https://nycode.jfrog.io/artifactory/nycode-snapshots/"
+            url = uri(if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+            credentials(PasswordCredentials::class) {
+                username = artifactoryUsername
+                password = artifactoryPassword
             }
         }
     }
 }
-
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_KEY")
-    setPublications("mavenJava")
-    pkg {
-        repo = "maven"
-        name = "i18next"
-        userOrg = "votebot"
-        setLicenses("Apache-2.0")
-        vcsUrl = "https://github.com/votebot/i18next.git"
-        version {
-            name = project.version as String
-        }
-
-    }
-}
-
-fun com.jfrog.bintray.gradle.BintrayExtension.pkg(block: com.jfrog.bintray.gradle.BintrayExtension.PackageConfig.() -> Unit) = pkg(delegateClosureOf(block))
-fun com.jfrog.bintray.gradle.BintrayExtension.PackageConfig.version(block: com.jfrog.bintray.gradle.BintrayExtension.VersionConfig.() -> Unit) = version(delegateClosureOf(block))
-fun com.jfrog.bintray.gradle.BintrayExtension.VersionConfig.gpg(block: com.jfrog.bintray.gradle.BintrayExtension.GpgConfig.() -> Unit) = gpg(delegateClosureOf(block))

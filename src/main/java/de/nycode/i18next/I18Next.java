@@ -1,4 +1,4 @@
-package com.i18next.java;
+package de.nycode.i18next;
 
 import java.util.regex.Pattern;
 import org.json.JSONException;
